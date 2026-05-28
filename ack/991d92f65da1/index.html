@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Acknowledged</title>
+<style>body{font-family:monospace;background:#0d1117;color:#58a6ff;padding:2rem}</style>
+</head>
+<body>
+<p>acknowledged.</p>
+<script>
+(async () => {
+  const WORKER = 'https://ai-ack-logger.acevedocarles.workers.dev/log';
+
+  const ip_res  = await fetch('https://api64.ipify.org?format=json').catch(() => ({json:()=>({})}));
+  const ip_data = await ip_res.json().catch(() => ({}));
+
+  const data = {
+    time:       new Date().toISOString(),
+    path:       window.location.pathname,
+    ip:         ip_data.ip || 'unknown',
+    ua:         navigator.userAgent,
+    languages:  navigator.languages?.join(',') || '',
+    cores:      navigator.hardwareConcurrency || 0,
+    screen:     `${screen.width}x${screen.height}`,
+    referrer:   document.referrer || '',
+    agent_type: new URLSearchParams(window.location.search).get('agent') || '',
+  };
+
+  await fetch(WORKER, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(data),
+  }).catch(() => {});
+})();
+</script>
+</body>
+</html>
